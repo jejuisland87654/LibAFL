@@ -89,9 +89,11 @@ impl NautilusContext {
         let grammar_file = grammar_file.as_ref();
         if grammar_file.extension().unwrap_or_default() == "py" {
             log::debug!("Creating NautilusContext from python grammar");
-            let ctx = python_grammar_loader::load_python_grammar(
+            pyo3::prepare_freethreaded_python();
+            let mut ctx = python_grammar_loader::load_python_grammar(
                 fs::read_to_string(grammar_file)?.as_str(),
             );
+            ctx.initialize(tree_depth);
             return Ok(Self { ctx });
         }
         log::debug!("Creating NautilusContext from json grammar");
